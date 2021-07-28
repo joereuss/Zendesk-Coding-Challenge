@@ -1,8 +1,10 @@
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Scanner;
-
 
 public class CLI {
 
@@ -15,17 +17,21 @@ public class CLI {
       System.out.println("Select an option below:");
       printMenu();
       userInput = scnr.nextInt();
-      
+
       switch (userInput) {
         case 1:
+          System.out.println("what ticket number would you like to view?");
+          userInput = scnr.nextInt();
           try {
-            viewOne(2);
+            System.out.println(viewOne(userInput));
           } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            System.out.println(
+                "The ticket number you are trying to access does not exist :(\nPlease try a new "
+                + "ticket number or enter 3 to exit the program\n");
+
           }
           break;
-          
+
         case 3:
           run = false;
           break;
@@ -39,16 +45,39 @@ public class CLI {
 
   private static void printMenu() {
     System.out
-        .println("[1] - view all tickets\n[2] - view a specific ticket\n[3] - quit the program");
+        .println("[1] - view a specific ticket\n[2] - view all tickets\n[3] - quit the program");
   }
-  
+
+
+
   public static String viewOne(int ticketId) throws IOException {
-    String command = "curl https://zccreuss.zendesk.com/api/v2/tickets/" + ticketId + ".json \\  -v -u joereuss8@gmail.com:LucySandy1!";
-    Process process = Runtime.getRuntime().exec(command);
-    InputStream oneTicket = process.getInputStream();
-    String result = new InputStreamReader(oneTicket).toString();
-    System.out.println(result);
-    return null;
+
+    URL url = new URL("https://zccreuss.zendesk.com/api/v2/tickets/" + ticketId + ".json");
+    HttpURLConnection http = (HttpURLConnection) url.openConnection();
+    http.setRequestProperty("Authorization", "Basic am9lcmV1c3M4QGdtYWlsLmNvbToyUG90YXRvZQ==");
+    InputStream inputStream = http.getInputStream();
+
+
+    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+    StringBuilder sb = new StringBuilder();
+
+    String line = null;
+    try {
+      while ((line = reader.readLine()) != null) {
+        sb.append(line + "\n");
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    } finally {
+      try {
+        inputStream.close();
+      } catch (IOException e) {
+        System.out.println("u r stupid");
+        e.printStackTrace();
+      }
+    }
+    http.disconnect();
+    return sb.toString();
+
   }
 }
-
