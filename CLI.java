@@ -6,6 +6,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Scanner;
 
+
 public class CLI {
 
   public static void main(String[] args) {
@@ -20,20 +21,21 @@ public class CLI {
 
       switch (userInput) {
         case 1:
-          System.out.println("what ticket number would you like to view?");
+          System.out.println("What ticket number would you like to view?");
           userInput = scnr.nextInt();
           try {
             System.out.println(viewOne(userInput));
           } catch (IOException e) {
             System.out.println(
                 "The ticket number you are trying to access does not exist :(\nPlease try a new "
-                + "ticket number or enter 3 to exit the program\n");
+                    + "ticket number or enter 3 to exit the program\n");
 
           }
           break;
 
         case 3:
           run = false;
+          scnr.close();
           break;
       }
 
@@ -54,6 +56,7 @@ public class CLI {
 
     URL url = new URL("https://zccreuss.zendesk.com/api/v2/tickets/" + ticketId + ".json");
     HttpURLConnection http = (HttpURLConnection) url.openConnection();
+    http.setRequestProperty("Accept", "application/json");
     http.setRequestProperty("Authorization", "Basic am9lcmV1c3M4QGdtYWlsLmNvbToyUG90YXRvZQ==");
     InputStream inputStream = http.getInputStream();
 
@@ -72,12 +75,19 @@ public class CLI {
       try {
         inputStream.close();
       } catch (IOException e) {
-        System.out.println("u r stupid");
+        
         e.printStackTrace();
       }
     }
     http.disconnect();
-    return sb.toString();
+    String ticketStr = sb.toString();
+
+    
+    Ticket ticket = new Ticket(ticketStr);
+    String retString = "ID: " + ticket.getID() + "\nSubject: " + ticket.getSubject()
+        + "\nDescription: " + ticket.getDescription();
+
+    return retString;
 
   }
 }
