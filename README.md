@@ -10,3 +10,5 @@ In this coding challenge, I was required to:
 
 I decided to code this challenge using java and displaying the data using CLI.
 
+compile by java -cp .;java-json.jar CLI
+
