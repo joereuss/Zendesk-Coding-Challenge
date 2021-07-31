@@ -18,8 +18,8 @@ public class Ticket {
   private String createdTime;
   private int count;
   private String info;
-  private String beforeCursor;
-  private String afterCursor;
+  private String beforeLink;
+  private String afterLink;
 
   /**
    * This method represents the Ticket object constructor
@@ -67,8 +67,8 @@ public class Ticket {
           description = arr.getJSONObject(i).getString("description");
           info += "ID: " + ID + "\nSubject: " + subject + "\nDescription: " + description + "\n\n";
       }
-      beforeCursor = jobjectTicket.getJSONObject("meta").getString("before_cursor");
-      afterCursor = jobjectTicket.getJSONObject("meta").getString("after_cursor");
+      beforeLink = jobjectTicket.getJSONObject("links").getString("prev");
+      afterLink = jobjectTicket.getJSONObject("links").getString("next");
     } catch (JSONException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -120,8 +120,8 @@ public class Ticket {
    * 
    * @return the beforeCursor
    */
-  public String getBeforeCursor() {
-    return beforeCursor;
+  public String getBeforeLink() {
+    return beforeLink;
   }
   
   /**
@@ -129,8 +129,8 @@ public class Ticket {
    * 
    * @return the afterCursor
    */
-  public String getAfterCursor() {
-    return afterCursor;
+  public String getAfterLink() {
+    return afterLink;
   }
 
   

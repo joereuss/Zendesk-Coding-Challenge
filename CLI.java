@@ -48,7 +48,7 @@ public class CLI {
 
           // case 2: user would like to view all tickets, split into 25 on each page
           case 2:
-            System.out.println(viewAll());
+            viewAll(null, 1);
             break;
 
           // case 3: user would like to exit the program
@@ -131,12 +131,12 @@ public class CLI {
 
 
 
-  public static String viewAll() {
+  public static void viewAll(URL url, int pageNum) {
     int numOfTickets = 0;
     int numOfPages = 0;
     try {
-      URL url = new URL("https://zccreuss.zendesk.com/api/v2/tickets/count.json");
-      HttpURLConnection http = (HttpURLConnection) url.openConnection();
+      URL countUrl = new URL("https://zccreuss.zendesk.com/api/v2/tickets/count.json");
+      HttpURLConnection http = (HttpURLConnection) countUrl.openConnection();
       http.setRequestProperty("Accept", "application/json");
       http.setRequestProperty("Authorization", "Basic am9lcmV1c3M4QGdtYWlsLmNvbToyUG90YXRvZQ==");
       InputStream inputStream = http.getInputStream();
@@ -166,6 +166,7 @@ public class CLI {
       numOfTickets = count.getCount();
 
 
+
       // get the number of pages to be displayed to the UI
       if (numOfTickets % 25 != 0) {
         numOfPages = (numOfTickets / 25) + 1;
@@ -174,27 +175,30 @@ public class CLI {
       }
 
       // display number of pages to the UI as well as the current page (1)
-      System.out.println("\nShowing page 1 of " + numOfPages + ":\n");
+      System.out.println("\nShowing page " + pageNum + " of " + numOfPages + ":\n");
 
 
     } catch (MalformedURLException e) {
       System.out.println("not a valid URL for API");
       e.printStackTrace();
-      return null;
+      return;
 
     } catch (IOException e) {
       System.out.println("problem connecting to the API");
       e.printStackTrace();
-      return null;
+      return;
     }
 
     if (numOfTickets == 0) {
-      return "no tickets available to display";
+      System.out.println("no tickets available to display");
+      return;
     }
 
     if (numOfTickets > 25) {
       try {
-        URL url = new URL("https://zccreuss.zendesk.com/api/v2/tickets.json?page[size]=25");
+        if (url == null) {
+          url = new URL("https://zccreuss.zendesk.com/api/v2/tickets.json?page[size]=25");
+        }
         HttpURLConnection http = (HttpURLConnection) url.openConnection();
         http.setRequestProperty("Accept", "application/json");
         http.setRequestProperty("Authorization", "Basic am9lcmV1c3M4QGdtYWlsLmNvbToyUG90YXRvZQ==");
@@ -234,38 +238,65 @@ public class CLI {
           System.out.println(
               "ENTER 'next/prev' to view the next or previous page\nor enter 'back' to go back");
           input = s.next();
-          
+
           switch (input) {
             case "next":
-              break;
-            
-            
+              
+              if (pageNum == numOfPages) {
+                System.out.println("There is no next page!");
+                break;
+              }
+              if (pageNum != numOfPages) {
+                pageNum++;
+              }
+
+              url = new URL(multiTicket.getAfterLink());
+              // recursive call to viewAll
+              viewAll(url, pageNum);
+              return;
+
+
             case "prev":
+              if (pageNum == 1) {
+                System.out.println("There is no previous page!");
+                break;
+              }
+              if (pageNum != 1) {
+                pageNum--;
+              }
+              
+              url = new URL(multiTicket.getBeforeLink());
+              // recursive call to viewAll
+              viewAll(url, pageNum);
+              return;
+
+
+
+            case "back":
+              viewingAll = false;
               break;
-            
-            
-            case "quit":
-              break;
-            
-            
+
+
             default:
+              System.out.println("Invalid option, please try again!\n");
               break;
-                
+
           }
 
         }
 
 
       } catch (MalformedURLException e) {
-        // TODO Auto-generated catch block
+        System.out.println("incorrect URL for API");
         e.printStackTrace();
       } catch (IOException e) {
+        System.out.println("problem connecting to API");
         e.printStackTrace();
       }
     }
 
 
 
-    return null;
+    return;
   }
 }
