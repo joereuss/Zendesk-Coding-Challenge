@@ -10,5 +10,14 @@ In this coding challenge, I was required to:
 
 I decided to code this challenge using java and displaying the data using CLI.
 
-compile by java -cp .;java-json.jar CLI
+To run with Windows:
+  - Download the files from GitHub making sure to note where the files are located.
+  - Open the command prompt by typing cmd in the Windows search bar
+  - Navigate through your file system to find the folder containing the files downloaded from GitHub
+  - To compile, type:
+    - javac -cp java-json.jar CLI.java Ticket.java
+  - To run, type: 
+    - java -cp .;java-json.jar CLI
+
+
 
