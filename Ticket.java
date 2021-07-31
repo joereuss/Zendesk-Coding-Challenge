@@ -1,7 +1,6 @@
 import org.json.JSONException;
 import org.json.JSONObject;
 
-
 /**
  * This class is to represent the Ticket object
  * 
@@ -10,11 +9,13 @@ import org.json.JSONObject;
  */
 public class Ticket {
 
-  JSONObject jobject;
+  JSONObject jobjectTicket;
+  JSONObject jobjectCount;
   private String subject;
   private int ID;
   private String description;
   private String createdTime;
+  private int count;
 
 
   /**
@@ -24,16 +25,32 @@ public class Ticket {
    */
   public Ticket(String ticket) {
     try {
-      jobject = new JSONObject(ticket);
-      subject = jobject.getJSONObject("ticket").getString("subject");
-      ID = jobject.getJSONObject("ticket").getInt("id");
-      description = jobject.getJSONObject("ticket").getString("description");
+      jobjectTicket = new JSONObject(ticket);
+      subject = jobjectTicket.getJSONObject("ticket").getString("subject");
+      ID = jobjectTicket.getJSONObject("ticket").getInt("id");
+      description = jobjectTicket.getJSONObject("ticket").getString("description");
     } catch (JSONException e) {
-      System.out.println("not a valid json object");
+      System.out.println("not a valid json passed");
       e.printStackTrace();
     }
 
 
+  }
+  
+  /**
+   * This method is for the Ticket object representing the total amount of tickets
+   * 
+   * @param Ticket
+   * @param forToken
+   */
+  public Ticket(String Ticket, boolean forCount) {
+    try {
+      jobjectCount = new JSONObject(Ticket);
+      count = jobjectCount.getJSONObject("count").getInt("value");
+    } catch (JSONException e) {
+      System.out.println("not a valid json passed");
+      e.printStackTrace();
+    }
   }
 
 
@@ -61,6 +78,10 @@ public class Ticket {
 
   public String getDescription() {
     return description;
+  }
+  
+  public int getCount() {
+    return count;
   }
 
 

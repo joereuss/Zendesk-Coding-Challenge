@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.InputMismatchException;
 import java.util.Scanner;
@@ -43,6 +44,11 @@ public class CLI {
                       + "ticket number or enter 3 to exit the program\n");
 
             }
+            break;
+
+          // case 2: user would like to view all tickets, split into 25 on each page
+          case 2:
+            System.out.println(viewAll());
             break;
 
           // case 3: user would like to exit the program
@@ -123,5 +129,101 @@ public class CLI {
     return retString;
 
   }
-}
 
+  public static String viewAll() {
+    int numOfTickets = 0;
+    try {
+      URL url = new URL("https://zccreuss.zendesk.com/api/v2/tickets/count.json");
+      HttpURLConnection http = (HttpURLConnection) url.openConnection();
+      http.setRequestProperty("Accept", "application/json");
+      http.setRequestProperty("Authorization", "Basic am9lcmV1c3M4QGdtYWlsLmNvbToyUG90YXRvZQ==");
+      InputStream inputStream = http.getInputStream();
+
+      BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+      StringBuilder sb = new StringBuilder();
+
+      String line = null;
+      try {
+        while ((line = reader.readLine()) != null) {
+          sb.append(line + "\n");
+        }
+      } catch (IOException e) {
+        e.printStackTrace();
+      } finally {
+        try {
+          inputStream.close();
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
+      // disconnect from API
+      http.disconnect();
+      String ticketStrCount = sb.toString();
+      boolean forCount = true;
+      Ticket count = new Ticket(ticketStrCount, forCount);
+      numOfTickets = count.getCount();
+
+
+    } catch (MalformedURLException e) {
+      System.out.println("not a valid URL for API");
+      e.printStackTrace();
+      return null;
+      
+    } catch (IOException e) {
+      System.out.println("problem connecting to the API");
+      e.printStackTrace();
+      return null;
+    }
+
+    if (numOfTickets == 0) {
+      return "no tickets available to display";
+    }
+    
+    if (numOfTickets > 25) {
+      
+    }
+
+    // try {
+    // URL url = new URL("https://zccreuss.zendesk.com/api/v2/tickets.json");
+    // HttpURLConnection http = (HttpURLConnection) url.openConnection();
+    // http.setRequestProperty("Accept", "application/json");
+    // http.setRequestProperty("page[size]", "25");
+    // InputStream inputStream = http.getInputStream();
+    //
+    // BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+    // StringBuilder sb = new StringBuilder();
+    //
+    // String line = null;
+    // try {
+    // while ((line = reader.readLine()) != null) {
+    // sb.append(line + "\n");
+    // }
+    // } catch (IOException e) {
+    // e.printStackTrace();
+    // } finally {
+    // try {
+    // inputStream.close();
+    // } catch (IOException e) {
+    // e.printStackTrace();
+    // }
+    // }
+    // // disconnect from API
+    // http.disconnect();
+    // String ticketStr = sb.toString();
+    //
+    // for (int i = 0; i < 25; i++) {
+    //
+    // }
+    //
+    //
+    // } catch (MalformedURLException e) {
+    // // TODO Auto-generated catch block
+    // e.printStackTrace();
+    // } catch (IOException e) {
+    //
+    // }
+
+
+    return null;
+  }
+}
