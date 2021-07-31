@@ -1,3 +1,4 @@
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -16,7 +17,9 @@ public class Ticket {
   private String description;
   private String createdTime;
   private int count;
-
+  private String info;
+  private String beforeCursor;
+  private String afterCursor;
 
   /**
    * This method represents the Ticket object constructor
@@ -29,6 +32,7 @@ public class Ticket {
       subject = jobjectTicket.getJSONObject("ticket").getString("subject");
       ID = jobjectTicket.getJSONObject("ticket").getInt("id");
       description = jobjectTicket.getJSONObject("ticket").getString("description");
+      info = "ID: " + ID + "\nSubject: " + subject + "\nDescription: " + description;
     } catch (JSONException e) {
       System.out.println("not a valid json passed");
       e.printStackTrace();
@@ -36,7 +40,7 @@ public class Ticket {
 
 
   }
-  
+
   /**
    * This method is for the Ticket object representing the total amount of tickets
    * 
@@ -53,17 +57,38 @@ public class Ticket {
     }
   }
 
+  public Ticket(String Ticket, int pages) {
+    try {
+      jobjectTicket = new JSONObject(Ticket);
+      JSONArray arr = jobjectTicket.getJSONArray("tickets");
+      for (int i = 0; i < arr.length(); i++) {
+          ID = arr.getJSONObject(i).getInt("id");
+          subject = arr.getJSONObject(i).getString("subject");
+          description = arr.getJSONObject(i).getString("description");
+          info += "ID: " + ID + "\nSubject: " + subject + "\nDescription: " + description + "\n\n";
+      }
+      beforeCursor = jobjectTicket.getJSONObject("meta").getString("before_cursor");
+      afterCursor = jobjectTicket.getJSONObject("meta").getString("after_cursor");
+    } catch (JSONException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    
+  }
+
 
   /**
    * Getter for the String subject
+   * 
    * @return - subject
    */
   public String getSubject() {
     return subject;
   }
 
-  /** 
+  /**
    * Getter for the int ID
+   * 
    * @return - ID
    */
 
@@ -73,15 +98,50 @@ public class Ticket {
 
   /**
    * Getter for the String description
+   * 
    * @return - description
    */
 
   public String getDescription() {
     return description;
   }
-  
+
+  /**
+   * getter for the count of tickets
+   * 
+   * @return count
+   */
   public int getCount() {
     return count;
+  }
+  
+  /**
+   * Getter for beforeCursor
+   * 
+   * @return the beforeCursor
+   */
+  public String getBeforeCursor() {
+    return beforeCursor;
+  }
+  
+  /**
+   * Getter for afterCursor
+   * 
+   * @return the afterCursor
+   */
+  public String getAfterCursor() {
+    return afterCursor;
+  }
+
+  
+  /**
+   * A toString method for the ticket object
+   * 
+   * @return Ticket in a string form showing info valuable for the UI
+   */
+  @Override
+  public String toString() {
+    return info;
   }
 
 

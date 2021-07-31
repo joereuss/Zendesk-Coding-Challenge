@@ -54,7 +54,7 @@ public class CLI {
           // case 3: user would like to exit the program
           case 3:
             run = false;
-            System.out.println("Thank you! Goodbye!");
+            System.out.println("\nThank you! Goodbye!");
             scnr.close();
             break;
 
@@ -123,15 +123,17 @@ public class CLI {
 
     // create a ticket object and return the ticket in a user-friendly way
     Ticket ticket = new Ticket(ticketStr);
-    String retString = "ID: " + ticket.getID() + "\nSubject: " + ticket.getSubject()
-        + "\nDescription: " + ticket.getDescription();
+    String retString = ticket.toString();
 
     return retString;
 
   }
 
+
+
   public static String viewAll() {
     int numOfTickets = 0;
+    int numOfPages = 0;
     try {
       URL url = new URL("https://zccreuss.zendesk.com/api/v2/tickets/count.json");
       HttpURLConnection http = (HttpURLConnection) url.openConnection();
@@ -164,11 +166,22 @@ public class CLI {
       numOfTickets = count.getCount();
 
 
+      // get the number of pages to be displayed to the UI
+      if (numOfTickets % 25 != 0) {
+        numOfPages = (numOfTickets / 25) + 1;
+      } else {
+        numOfPages = numOfTickets / 25;
+      }
+
+      // display number of pages to the UI as well as the current page (1)
+      System.out.println("\nShowing page 1 of " + numOfPages + ":\n");
+
+
     } catch (MalformedURLException e) {
       System.out.println("not a valid URL for API");
       e.printStackTrace();
       return null;
-      
+
     } catch (IOException e) {
       System.out.println("problem connecting to the API");
       e.printStackTrace();
@@ -178,50 +191,79 @@ public class CLI {
     if (numOfTickets == 0) {
       return "no tickets available to display";
     }
-    
+
     if (numOfTickets > 25) {
-      
+      try {
+        URL url = new URL("https://zccreuss.zendesk.com/api/v2/tickets.json?page[size]=25");
+        HttpURLConnection http = (HttpURLConnection) url.openConnection();
+        http.setRequestProperty("Accept", "application/json");
+        http.setRequestProperty("Authorization", "Basic am9lcmV1c3M4QGdtYWlsLmNvbToyUG90YXRvZQ==");
+        System.out.println(http.getRequestProperties());
+
+        InputStream inputStream = http.getInputStream();
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        StringBuilder sb = new StringBuilder();
+
+        String line = null;
+        try {
+          while ((line = reader.readLine()) != null) {
+            sb.append(line + "\n");
+          }
+        } catch (IOException e) {
+          e.printStackTrace();
+        } finally {
+          try {
+            inputStream.close();
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
+        }
+        // disconnect from API
+        http.disconnect();
+        String ticketStr = sb.toString();
+
+        Ticket multiTicket = new Ticket(ticketStr, numOfPages);
+        System.out.println(multiTicket.toString());
+
+        boolean viewingAll = true;
+
+        while (viewingAll) {
+          Scanner s = new Scanner(System.in);
+          String input = "";
+          System.out.println(
+              "ENTER 'next/prev' to view the next or previous page\nor enter 'back' to go back");
+          input = s.next();
+          
+          switch (input) {
+            case "next":
+              break;
+            
+            
+            case "prev":
+              break;
+            
+            
+            case "quit":
+              break;
+            
+            
+            default:
+              break;
+                
+          }
+
+        }
+
+
+      } catch (MalformedURLException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
     }
 
-    // try {
-    // URL url = new URL("https://zccreuss.zendesk.com/api/v2/tickets.json");
-    // HttpURLConnection http = (HttpURLConnection) url.openConnection();
-    // http.setRequestProperty("Accept", "application/json");
-    // http.setRequestProperty("page[size]", "25");
-    // InputStream inputStream = http.getInputStream();
-    //
-    // BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-    // StringBuilder sb = new StringBuilder();
-    //
-    // String line = null;
-    // try {
-    // while ((line = reader.readLine()) != null) {
-    // sb.append(line + "\n");
-    // }
-    // } catch (IOException e) {
-    // e.printStackTrace();
-    // } finally {
-    // try {
-    // inputStream.close();
-    // } catch (IOException e) {
-    // e.printStackTrace();
-    // }
-    // }
-    // // disconnect from API
-    // http.disconnect();
-    // String ticketStr = sb.toString();
-    //
-    // for (int i = 0; i < 25; i++) {
-    //
-    // }
-    //
-    //
-    // } catch (MalformedURLException e) {
-    // // TODO Auto-generated catch block
-    // e.printStackTrace();
-    // } catch (IOException e) {
-    //
-    // }
 
 
     return null;
