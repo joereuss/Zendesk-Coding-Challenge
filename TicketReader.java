@@ -22,7 +22,6 @@ public class TicketReader {
 
     // set up connection to the Zendesk API
     try {
-      // URL url = new URL("https://zccreuss.zendesk.com/api/v2/tickets/" + ticketId + ".json");
       HttpURLConnection http = (HttpURLConnection) url.openConnection();
       // ensure we get a returned json file
       http.setRequestProperty("Accept", "application/json");
