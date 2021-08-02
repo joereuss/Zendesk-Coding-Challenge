@@ -15,9 +15,9 @@ To run with Windows:
   - Open the command prompt by typing cmd in the Windows search bar
   - Navigate through your file system to find the folder containing the files downloaded from GitHub
   - To compile, type:
-    - javac -cp java-json.jar CLI.java Ticket.java TicketReader.java
+    - javac -cp ".;lib/*" *.java
   - To run, type: 
-    - java -cp .;java-json.jar CLI
+    - java -cp ".;lib/*" CLI
 
 
 
