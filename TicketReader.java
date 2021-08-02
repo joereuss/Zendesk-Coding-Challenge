@@ -10,11 +10,19 @@ import java.util.Scanner;
 
 public class TicketReader {
 
-  public String viewOne(int ticketId) throws IOException {
+  private int pageNumber = 0;
+
+  /**
+   * @param ticketId
+   * @param url
+   * @return
+   * @throws IOException
+   */
+  public String viewOne(int ticketId, URL url) throws IOException {
 
     // set up connection to the Zendesk API
     try {
-      URL url = new URL("https://zccreuss.zendesk.com/api/v2/tickets/" + ticketId + ".json");
+      // URL url = new URL("https://zccreuss.zendesk.com/api/v2/tickets/" + ticketId + ".json");
       HttpURLConnection http = (HttpURLConnection) url.openConnection();
       // ensure we get a returned json file
       http.setRequestProperty("Accept", "application/json");
@@ -22,7 +30,7 @@ public class TicketReader {
       http.setRequestProperty("Authorization", "Basic am9lcmV1c3M4QGdtYWlsLmNvbToyUG90YXRvZQ==");
       // whatever the GET returned to us we put into an inputstream to read
 
-      InputStream inputStream = http.getInputStream();   
+      InputStream inputStream = http.getInputStream();
       String ticketStr = readInputStream(inputStream);
 
 
@@ -36,20 +44,28 @@ public class TicketReader {
 
       return retString;
     } catch (FileNotFoundException e) {
-      System.out.println("That ticket does not exist!");
+      return "That ticket does not exist!";
     } catch (MalformedURLException e) {
       System.out.println("invalid URL for API");
       e.printStackTrace();
     } catch (IOException e) {
       System.out.println("problem connecting to the API");
-      e.printStackTrace();
+      // e.printStackTrace();
     }
     return null;
   }
 
-  public void viewAll(URL url, int pageNum) {
+  /**
+   * @param url
+   */
+  public void viewAll(URL url) {
     int numOfTickets = 0;
     int numOfPages = 0;
+
+    if (pageNumber == 0) {
+      pageNumber = 1;
+    }
+
     try {
       // set up connection to the Zendesk API
       URL countUrl = new URL("https://zccreuss.zendesk.com/api/v2/tickets/count.json");
@@ -71,7 +87,6 @@ public class TicketReader {
       numOfTickets = count.getCount();
 
 
-
       // get the number of pages to be displayed to the UI
       if (numOfTickets % 25 != 0) {
         numOfPages = (numOfTickets / 25) + 1;
@@ -79,8 +94,7 @@ public class TicketReader {
         numOfPages = numOfTickets / 25;
       }
 
-      // display number of pages to the UI as well as the current page (1)
-      System.out.println("\nShowing page " + pageNum + " of " + numOfPages + ":\n");
+
 
       // catch any thrown exceptions
     } catch (MalformedURLException e) {
@@ -114,6 +128,9 @@ public class TicketReader {
       String ticketStr = readInputStream(inputStream);
       http.disconnect();
 
+      // display number of pages to the UI as well as the current page (1)
+      System.out.println("\nShowing page " + pageNumber + " of " + numOfPages + ":\n");
+
 
       Ticket multiTicket = new Ticket(ticketStr, numOfPages);
       System.out.println(multiTicket.toString());
@@ -134,32 +151,32 @@ public class TicketReader {
           // the case to show the user the next page if one exists
           case "next":
 
-            if (pageNum == numOfPages) {
+            if (pageNumber == numOfPages) {
               System.out.println("There is no next page!");
               break;
             }
-            if (pageNum != numOfPages) {
-              pageNum++;
+            if (pageNumber != numOfPages) {
+              pageNumber++;
             }
 
             url = new URL(multiTicket.getAfterLink());
             // recursive call to viewAll
-            viewAll(url, pageNum);
+            viewAll(url);
             return;
 
           // the case to show the user the previous page if one exists
           case "prev":
-            if (pageNum == 1) {
+            if (pageNumber == 1) {
               System.out.println("There is no previous page!");
               break;
             }
-            if (pageNum != 1) {
-              pageNum--;
+            if (pageNumber != 1) {
+              pageNumber--;
             }
 
             url = new URL(multiTicket.getBeforeLink());
             // recursive call to viewAll
-            viewAll(url, pageNum);
+            viewAll(url);
             return;
           // this breaks us out of the loop and method, to return back to the main UI
           case "back":
@@ -179,10 +196,10 @@ public class TicketReader {
       e.printStackTrace();
     } catch (IOException e) {
       System.out.println("problem connecting to API");
-      e.printStackTrace();
+      // e.printStackTrace();
     }
   }
-  
+
   /**
    * This method is designed to read any given InputStreams passed to it and return it in String
    * form. In our case, it returns the String in a JSON file format
@@ -190,7 +207,7 @@ public class TicketReader {
    * @param inputStream - the given InputStream to be read
    * @return - the given InputStream as a String
    */
-  public static String readInputStream(InputStream inputStream) {
+  public String readInputStream(InputStream inputStream) {
     // set up the reader and string builder
     BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
     StringBuilder sb = new StringBuilder();
@@ -217,7 +234,42 @@ public class TicketReader {
     String ticketStr = sb.toString();
     return ticketStr;
   }
-}
 
+  /**
+   * This method is mostly for testing purposes, to get the first ticket's ID
+   * 
+   * @return - The first ticket's ID
+   */
+  public int getFirstTicketID() {
+    try {
+      // default url for API if this method has not been recursively called
+
+      URL url = new URL("https://zccreuss.zendesk.com/api/v2/tickets.json?page[size]=1");
+
+      // usual API connection, similar to above
+      HttpURLConnection http = (HttpURLConnection) url.openConnection();
+      http.setRequestProperty("Accept", "application/json");
+      http.setRequestProperty("Authorization", "Basic am9lcmV1c3M4QGdtYWlsLmNvbToyUG90YXRvZQ==");
+
+      InputStream inputStream = http.getInputStream();
+      String ticketStr = readInputStream(inputStream);
+      http.disconnect();
+
+      Ticket ticket = new Ticket(ticketStr, 1);
+      return ticket.getID();
+
+    } catch (MalformedURLException e) {
+      System.out.println("incorrect URL for API");
+      e.printStackTrace();
+    } catch (IOException e) {
+      System.out.println("problem connecting to API");
+      e.printStackTrace();
+    }
+
+    return -1;
+  }
+
+
+}
 
 

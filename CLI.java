@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.net.URL;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
@@ -33,9 +34,8 @@ public class CLI {
             System.out.println("What ticket number would you like to view?");
             userInput = scnr.nextInt();
             try {
-              if (ticketReader.viewOne(userInput) != null) {
-                System.out.println(ticketReader.viewOne(userInput));
-              }
+              URL url = new URL("https://zccreuss.zendesk.com/api/v2/tickets/" + userInput + ".json");
+              System.out.println(ticketReader.viewOne(userInput, url));
             } catch (IOException e) {
               System.out.println(
                   "The ticket number you are trying to access does not exist :(\nPlease try a new "
@@ -46,7 +46,7 @@ public class CLI {
 
           // case 2: user would like to view all tickets, split into 25 on each page
           case 2:
-            ticketReader.viewAll(null, 1);
+            ticketReader.viewAll(null);
             break;
 
           // case 3: user would like to exit the program
