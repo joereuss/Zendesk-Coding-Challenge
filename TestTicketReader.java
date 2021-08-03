@@ -57,6 +57,9 @@ public class TestTicketReader {
 
   }
 
+  /**
+   * This method is to run unit tests on viewAll() from TicketReader.java
+   */
   @Test
   public void testViewAll() {
     try {
@@ -85,6 +88,7 @@ public class TestTicketReader {
    */
   @Test
   public void testReadInputStream() {
+    // note: new line added because the method adds a new line
     String s = "I like chicken sandwiches\n";
     // get bytes from string to make it into an InputStream
     InputStream is = new ByteArrayInputStream(s.getBytes());
