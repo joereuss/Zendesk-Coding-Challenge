@@ -13,12 +13,13 @@ public class TicketReader {
   private int pageNumber = 0;
 
   /**
-   * @param ticketId
-   * @param url
-   * @return
-   * @throws IOException
+   * This method is to view a specific ticket specified by the user by connecting to the Zendesk API
+   * 
+   * @param ticketId - The ID of the specified ticket
+   * @param url      - URL that leads to the specific ticket in question
+   * @return - either no tickets found or the ticket the user was looking for
    */
-  public String viewOne(int ticketId, URL url) throws IOException {
+  public String viewOne(int ticketId, URL url) {
 
     // set up connection to the Zendesk API
     try {
@@ -55,12 +56,17 @@ public class TicketReader {
   }
 
   /**
-   * @param url
+   * This method is for when the user wants to see all the tickets in my account, it is viewed 25
+   * pages at a time
+   * 
+   * @param url - the URL to connect to the API, it is null if it's the first iteration
    */
   public void viewAll(URL url) {
+    // set up vars to use later
     int numOfTickets = 0;
     int numOfPages = 0;
 
+    // for first iteration correct pagenumber, otherwise keep the changed value
     if (pageNumber == 0) {
       pageNumber = 1;
     }
@@ -241,7 +247,7 @@ public class TicketReader {
    */
   public int getFirstTicketID() {
     try {
-      // default url for API if this method has not been recursively called
+      // default url to get the very first element with page size 1
 
       URL url = new URL("https://zccreuss.zendesk.com/api/v2/tickets.json?page[size]=1");
 
@@ -250,13 +256,18 @@ public class TicketReader {
       http.setRequestProperty("Accept", "application/json");
       http.setRequestProperty("Authorization", "Basic am9lcmV1c3M4QGdtYWlsLmNvbToyUG90YXRvZQ==");
 
+      // read input stream
       InputStream inputStream = http.getInputStream();
       String ticketStr = readInputStream(inputStream);
+
+      // disconnect from API
       http.disconnect();
 
       Ticket ticket = new Ticket(ticketStr, 1);
       return ticket.getID();
 
+
+      // any caught exceptions
     } catch (MalformedURLException e) {
       System.out.println("incorrect URL for API");
       e.printStackTrace();
