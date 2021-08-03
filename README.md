@@ -21,4 +21,8 @@ To run with Windows:
   - To test, type:
     - java -cp ".;lib/*" org.junit.platform.console.ConsoleLauncher --scan-class-path
 
+To Run with Linux:
+  - Do the same as above
+    - except when compiling, running, and testing use a colon (:) instead of a semicolon (;) whenever a semicolon is used.
+
 
