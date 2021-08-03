@@ -18,6 +18,7 @@ To run with Windows:
     - javac -cp ".;lib/*" *.java
   - To run, type: 
     - java -cp ".;lib/*" CLI
-
+  - To test, type:
+    - java -cp ".;lib\*" org.junit.platform.console.ConsoleLauncher --scan-class-path
 
 
